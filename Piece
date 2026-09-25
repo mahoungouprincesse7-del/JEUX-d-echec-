@@ -1,0 +1,56 @@
+public abstract class Piece {
+    private final boolean noir; // true si la pièce est noire, false si blanche
+
+    // constructeur, on dit si la pièce est noire ou blanche
+    public Piece(boolean noir) {
+        this.noir = noir;
+    }
+
+    // retourne true si la pièce est noire
+    public boolean estNoir() {
+        return noir;
+    }
+
+    // méthode abstraite : chaque pièce doit définir ses propres règles de mouvement
+    public abstract boolean isValidMove(Position start, Position end,
+                                        boolean capture, Plateau plateau)
+                                        throws InvalidMoveException;
+
+    // vérifie que le chemin entre deux cases est libre (pas de pièce au milieu)
+    protected boolean cheminLibre(Position start, Position end, Plateau plateau)
+                                   throws InvalidMoveException {
+        int dx = Integer.signum(end.getX() - start.getX()); // direction horizontale : -1, 0 ou 1
+        int dy = Integer.signum(end.getY() - start.getY()); // direction verticale : -1, 0 ou 1
+        int x = start.getX() + dx; // on commence à la case juste après le départ
+        int y = start.getY() + dy;
+
+        // on avance case par case jusqu'à la case d'arrivée (sans l'inclure)
+        while (x != end.getX() || y != end.getY()) {
+            if (plateau.getPiece(new Position(x, y)) != null) {
+                return false; // il y a une pièce qui bloque, chemin pas libre
+            }
+            x += dx; // on avance d'une case dans la direction horizontale
+            y += dy; // on avance d'une case dans la direction verticale
+        }
+        return true; // aucune pièce trouvée sur le chemin, c'est libre
+    }
+
+    // affiche la pièce en 2 lettres, majuscule si noir, minuscule si blanc
+    @Override
+    public String toString() {
+        String name = this.getClass().getSimpleName(); // ex: "Cavalier"
+        String shortName;
+        if (name.length() >= 2) {
+            shortName = name.substring(0, 2); // on garde les 2 premières lettres ex: "Ca"
+        } else {
+            shortName = name;
+        }
+        if (noir) {
+            // noir : première lettre majuscule ex: "Ca"
+            return shortName.substring(0, 1).toUpperCase() + shortName.substring(1);
+        } else {
+            // blanc : tout en minuscule ex: "ca"
+            return shortName.toLowerCase();
+        }
+    }
+}
